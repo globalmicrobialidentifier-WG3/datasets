@@ -1,4 +1,8 @@
 # Assume we are on Ubuntu Precise, https://docs.travis-ci.com/user/reference/overview/
+matrix:
+  include:
+    - os: linux
+      dist: trusty
 before_install:
 # SRA toolkit
 - wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz
@@ -10,7 +14,10 @@ before_install:
 - gunzip -c edirect.tar.gz | tar xf -
 - export PATH=$PATH:$(pwd)/edirect
 - ./edirect/setup.sh
+# Check out the environment
 - echo $PATH
+- ls -d *
+- ls *
 # double check executables
 - which efetch
 - which fastq-dump
