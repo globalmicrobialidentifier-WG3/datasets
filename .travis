@@ -1,0 +1,3 @@
+script:
+  - "bash EXAMPLES/downloadAll.sh"
+
