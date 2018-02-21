@@ -31,6 +31,14 @@ sub main{
   $$settings{layout}||="onedir";
   $$settings{layout}=lc($$settings{layout});
   $$settings{numcpus}||=1;
+  $$settings{'calculate-hashsums'}||=0; # whether to recalculate hashsums and ignore warnings
+
+  #  If the user wants to recalculate hashsums, then
+  #  set the hashsum option on and the layout will be onedir.
+  if($$settings{layout} =~ /^hashsum/i){
+    $$settings{layout} = "onedir";
+    $$settings{'calculate-hashsums'}=1;
+  }
 
   if($$settings{version}){
     print "$0 $VERSION\n";
@@ -181,14 +189,23 @@ sub tsvToMakeHash{
           push(@{ $$make{"all"}{DEP} }, $filename3);
         }
 
-        # Checksums, if they exist
-        if($F{sha256sumread1} && $F{sha256sumread1} !~ /\-|NA/){
+        # Checksums, if they exist and if we're not recalculating
+        if($F{sha256sumread1} && $F{sha256sumread1} !~ /\-|NA/ && !$$settings{'calculate-hashsums'}){
           push(@{ $$make{"sha256sum.txt"}{CMD} }, "echo \"$F{sha256sumread1}  $filename1\" >> $make_target");
           push(@{ $$make{"sha256sum.txt"}{DEP} }, $filename1);
-        }
-        if($F{sha256sumread2} && $F{sha256sumread2} !~ /\-|NA/){
+        } 
+
+        if($F{sha256sumread2} && $F{sha256sumread2} !~ /\-|NA/ && !$$settings{'calculate-hashsums'}){
           push(@{ $$make{"sha256sum.txt"}{CMD} }, "echo \"$F{sha256sumread2}  $filename2\" >> $make_target");
           push(@{ $$make{"sha256sum.txt"}{DEP} }, $filename2);
+        }
+
+        # If we are requesting checksums, calculate them.
+        if ($$settings{'calculate-hashsums'}) {
+          push(@{ $$make{"sha256sum.txt"}{CMD} }, 
+            "sha256sum $filename1 >> $make_target",
+            "sha256sum $filename2 >> $make_target",
+          );
         }
       }
 
@@ -246,9 +263,16 @@ sub tsvToMakeHash{
           ]
         };
 
-        if($F{sha256sumassembly} && $F{sha256sumassembly} !~ /\-|NA/){
+        # Calculate hashsums if they exist and if we are not recalculating them
+        if($F{sha256sumassembly} && $F{sha256sumassembly} !~ /\-|NA/ && !$$settings{'calculate-hashsums'}){
           push(@{ $$make{"sha256sum.txt"}{CMD} }, "echo \"$F{sha256sumassembly}  $filename1\" >> $make_target");
           push(@{ $$make{"sha256sum.txt"}{DEP} }, $filename1);
+        }
+
+        if ($$settings{'calculate-hashsums'}) {
+          push(@{ $$make{"sha256sum.txt"}{CMD} }, 
+            "sha256sum $filename1 >> $make_target",
+          );
         }
       }
 
@@ -282,7 +306,9 @@ sub tsvToMakeHash{
   close TSV;
 
   # Last of the make target(s)
-  push(@{ $$make{"sha256sum.txt"}{CMD} }, "sha256sum -c $make_target");
+  if(!$$settings{'calculate-hashsums'}){
+    push(@{ $$make{"sha256sum.txt"}{CMD} }, "sha256sum -c $make_target");
+  }
 
   return $make;
 }
@@ -336,6 +362,11 @@ sub runMakefile{
       $command";
   }
 
+  # Notify the user about where hashsums are.
+  if($$settings{'calculate-hashsums'}){
+    logmsg "Hashsums will be calculated and recorded into sha256sum.txt. Remember to insert these new values into your spreadsheet.";
+  }
+
   return 1;
 }
 
@@ -348,6 +379,8 @@ sub usage{
   --format     tsv      The input format. Default: tsv. No other format
                         is accepted at this time.
   --layout     onedir   onedir   - Everything goes into one directory
+                        hashsums - Like 'onedir', but will recalculate hashsums
+                                   and will ignore hashsum warnings.
                         byrun    - Each genome run gets its separate directory
                         byformat - Fastq files to one dir, assembly to another, etc
                         cfsan    - Reference and samples in separate directories with
