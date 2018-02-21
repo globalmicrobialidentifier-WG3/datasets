@@ -28,7 +28,7 @@ before_install:
 - tar jxvf htslib-1.3.2.tar.bz2
 - tar jxvf samtools-1.3.1.tar.bz2
 - tar jxvf bcftools-1.3.1.tar.bz2
-- export PATH=$PATH:samtools-1.3.1:htslib-1.3.2:bcftools-1.3.1
+- export PATH=$PATH:samtools-1.3.2:htslib-1.3.2:bcftools-1.3.1
 - which samtools
 - which bcftools
 - which bgzip
