@@ -17,7 +17,6 @@ before_install:
 # Check out the environment
 - echo $PATH
 - ls -d *
-- ls *
 # double check executables
 - which efetch
 - which fastq-dump
