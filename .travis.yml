@@ -14,14 +14,14 @@ before_install:
 - perl -MNet::FTP -e '$ftp = new Net::FTP("ftp.ncbi.nlm.nih.gov", Passive => 1); $ftp->login; $ftp->binary; $ftp->get("/entrez/entrezdirect/edirect.tar.gz");'
 - gunzip -c edirect.tar.gz | tar xf -
 - export PATH=$PATH:$(pwd)/edirect
-- ./edirect/setup.sh
+  #- ./edirect/setup.sh
 - which efetch
 # CFSAN SNP pipeline
 - pip install snp-pipeline --user
 - export PATH=$PATH:$HOME/.local/bin
 - which run_snp_pipeline.sh
 # bowtie
-- apt-get install bowtie2
+- sudo apt-get install bowtie2
 - which bowtie2
 # samtools/bcftools/tabix/bgzip
 - wget 'https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2' 'https://github.com/samtools/htslib/releases/download/1.3.2/htslib-1.3.2.tar.bz2' 'https://github.com/samtools/bcftools/releases/download/1.3.1/bcftools-1.3.1.tar.bz2'
@@ -36,7 +36,12 @@ before_install:
 # Check out the environment
 - echo $PATH
 - ls -d *
+# perl
+- which cpanm
 - which perl
+- (set -e; for i in Encode::Locale HTML::Parser HTTP::Date Net::HTTP; do cpanm -l . $i; done;)
+- export PERL5LIB=$PERL5LIB:$(pwd)/lib/perl5
+
 
 install: bash EXAMPLES/downloadAll.sh
 
