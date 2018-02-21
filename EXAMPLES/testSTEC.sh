@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NUMCPUS=12
+NUMCPUS=1
 
 set -e
 

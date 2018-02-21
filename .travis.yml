@@ -14,7 +14,7 @@ before_install:
 - perl -MNet::FTP -e '$ftp = new Net::FTP("ftp.ncbi.nlm.nih.gov", Passive => 1); $ftp->login; $ftp->binary; $ftp->get("/entrez/entrezdirect/edirect.tar.gz");'
 - gunzip -c edirect.tar.gz | tar xf -
 - export PATH=$PATH:$(pwd)/edirect
-  #- ./edirect/setup.sh
+- ./edirect/setup.sh
 - which efetch
 # CFSAN SNP pipeline
 - pip install snp-pipeline --user
@@ -40,7 +40,7 @@ before_install:
 # perl
 - which cpanm
 - which perl
-- (set -e; for i in Encode::Locale HTML::Parser HTTP::Date Net::HTTP; do cpanm -l . $i; done;)
+  #- (set -e; for i in Encode::Locale HTML::Parser HTTP::Date Net::HTTP; do cpanm -l . $i; done;)
 - export PERL5LIB=$PERL5LIB:$(pwd)/lib/perl5
 
 
