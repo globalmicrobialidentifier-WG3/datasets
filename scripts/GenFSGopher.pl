@@ -88,6 +88,8 @@ sub tsvToMakeHash{
   
   # Initialize a make hash
   my $make={};
+  # TODO rm -f $make_target.tmp and pipe all hashsum contents to $make_target.tmp.
+  # TODO last step of sha256sum.txt, mv -v $make_target.tmp to $make_target.
   $$make{"sha256sum.txt"}{CMD}=["rm -f $make_target"];
   $$make{"all"}={
     CMD=>[
@@ -206,6 +208,8 @@ sub tsvToMakeHash{
             "sha256sum $filename1 >> $make_target",
             "sha256sum $filename2 >> $make_target",
           );
+          push(@{ $$make{"sha256sum.txt"}{DEP} }, $filename1);
+          push(@{ $$make{"sha256sum.txt"}{DEP} }, $filename2);
         }
       }
 
@@ -273,6 +277,7 @@ sub tsvToMakeHash{
           push(@{ $$make{"sha256sum.txt"}{CMD} }, 
             "sha256sum $filename1 >> $make_target",
           );
+          push(@{ $$make{"sha256sum.txt"}{DEP} }, $filename1);
         }
       }
 
