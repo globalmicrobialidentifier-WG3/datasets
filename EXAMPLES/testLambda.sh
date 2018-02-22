@@ -53,6 +53,7 @@ GenFSGopher.pl --outdir $THISDIR/$name --layout cfsan --numcpus $NUMCPUS $tsv
 
 msg "SNP-Pipeline"
 
+find . -type f -name '*.fastq.gz' -size 0 -exec rm -v {} \;
 REF=$(ls $THISDIR/$name/reference/*.fasta | head -n 1)
 nice run_snp_pipeline.sh -s $THISDIR/$name/samples -m soft -o $THISDIR/$name/snp-pipeline $REF
 
