@@ -34,6 +34,12 @@ before_install:
 - which bcftools
 - which bgzip
 - which tabix
+# VarScan
+- wget --max-redirect 50 'http://downloads.sourceforge.net/project/varscan/VarScan.v2.3.7.jar'
+- export CLASSPATH=$CLASSPATH:$(pwd)/VarScan.v2.3.7.jar
+# Picard
+- wget https://github.com/broadinstitute/picard/releases/download/2.17.10/picard.jar
+- export CLASSPATH=$CLASSPATH:$(pwd)/picard.jar
 # Check out the environment
 - echo $PATH
 - ls -d *
@@ -42,6 +48,7 @@ before_install:
 - which perl
   #- (set -e; for i in Encode::Locale HTML::Parser HTTP::Date Net::HTTP; do cpanm -l . $i; done;)
 - export PERL5LIB=$PERL5LIB:$(pwd)/lib/perl5
+
 
 
 install: bash EXAMPLES/testLambda.sh
