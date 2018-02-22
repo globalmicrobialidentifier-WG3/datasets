@@ -162,14 +162,14 @@ sub tsvToMakeHash{
             $dumpdir, $filename1,
           ],
           CMD=>[
-            "mv $dumpdir/$F{srarun_acc}_2.fastq.gz $make_target",
+            "mv $dumpdir/$F{srarun_acc}_2.fastq.gz '$make_target' || touch '$make_target'",
           ],
         };
         $$make{$filename1}={
           CMD=>[
             "\@echo Downloading $make_target $F{srarun_acc}",
             "fastq-dump --defline-seq '$seqIdTemplate' --defline-qual '+' --split-files -O $dumpdir --gzip $F{srarun_acc} ",
-            "mv $dumpdir/$F{srarun_acc}_1.fastq.gz $make_target",
+            "mv $dumpdir/$F{srarun_acc}_1.fastq.gz '$make_target'",
           ],
           DEP=>[
             $dumpdir
