@@ -45,7 +45,7 @@ which raxmlHPC
 
 msg "Downloading datasets"
 
-tsv="$THISDIR/../datasets/Escherichia_coli_1405WAEXK-1.tsv"
+tsv="$THISDIR/lambda.tsv"
 name=$(basename $tsv .tsv)
 
 msg "Downloading $name"
