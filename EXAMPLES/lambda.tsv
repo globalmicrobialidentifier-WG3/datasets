@@ -1,7 +1,7 @@
 Organism	lambda phage					
 Outbreak	n/a					
 pmid						
-tree						
+tree	https://api.opentreeoflife.org/v3/study/ot_1227/tree/tree1.tre
 source						
 dataType	empirical					
 intendedUse	testing					
