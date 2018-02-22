@@ -1,0 +1,25 @@
+Organism	lambda phage					
+Outbreak	n/a					
+pmid						
+tree						
+source						
+dataType	empirical					
+intendedUse	testing					
+Comment	This is intended to simply test the download script; no vetting has been performed on this dataset.					
+						
+biosample_acc	strain	genBankAssembly	SRArun_acc	outbreak	dataSetName	suggestedReference
+	Enterobacteria phage lambda	GCA_000840245				TRUE
+SAMN01758937	Chem repaired lambda whole genome		SRR987657			FALSE
+SAMN07185804	1c-expDNAi1control-1_S3_L001_R1_001_AF_SOL_650		SRR5640806			FALSE
+SAMN07185806	1d-exp-DNAi1control-1_S4_L001_R1_001_AF_SOL_650		SRR5640808			FALSE
+SAMN01758937	Chem repaired lambda whole genome		SRR987658			FALSE
+SAMN07185800	1a-con-DNAi1control-1_S1_L001_R1_001_AF_SOL_650		SRR5640810			FALSE
+SAMN07185802	1b-con-DNAi1control-1_S2_L001_R1_001_AF_SOL_650		SRR5640812			FALSE
+SAMN07185817	3c-exp-DNAi3-3_S19_L001_R1_001_AF_SOL_712		SRR5640813			FALSE
+SAMN07185816	3b-con-DNAi3-3_S18_L001_R1_001_AF_SOL_712		SRR5640822			FALSE
+SAMN07185810	1d-exp-DNAi3-1_S4_L001_R1_001_AF_SOL_712		SRR5640816			FALSE
+SAMN07185818	3d-exp-DNAi3-3_S20_L001_R1_001_AF_SOL_712		SRR5640814			FALSE
+SAMN07185803	1c-exp-DNAi1-1-overnight1_S3_L001_R1_001_AF_SOL_690_OUTPUT		SRR5640805			FALSE
+SAMN07185805	1d-exp-DNAi1-1-overnight1_S4_L001_R1_001_AF_SOL_690_OUTPUT		SRR5640807			FALSE
+SAMN07185799	1a-con-DNAi1-1-overnight1_S1_L001_R1_001_AF_SOL_690_OUTPUT		SRR5640809			FALSE
+SAMN04259705	SS_RTCAS1_POC_018		SRR2913617			FALSE
