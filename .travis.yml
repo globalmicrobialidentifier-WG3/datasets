@@ -1,3 +1,5 @@
+language: bash
+
 # Assume we are on Ubuntu Precise, https://docs.travis-ci.com/user/reference/overview/
 matrix:
   include:
