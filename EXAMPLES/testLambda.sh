@@ -50,78 +50,8 @@ name=$(basename $tsv .tsv)
 
 msg "Downloading $name"
 GenFSGopher.pl --outdir $THISDIR/$name --layout cfsan --numcpus $NUMCPUS $tsv 
+find . -type f -name '*.fastq.gz' -size 0 -exec rm -v {} \;
 
-# creating a tree is giving me a heada
-#exit;
-
-msg "SNP-Pipeline"
-
-# Reverse complement all read 1 into read 2,
-# a poor man's way of making PE reads because
-# the lambda set is SE only.
-find . -type f -name '*.fastq.gz' -size 0 | xargs -P 1 -n 1 perl -e '
-  my $r2 = $ARGV[0];
-  $r1 = $r2;
-  $r1 =~ s/_2.fastq.gz/_1.fastq.gz/;
-  $r1 =~ s/_R2_/_R1_/;
-  $r2 =~ s/\.gz$//;
-  my $lineCounter=0;
-  open(R1,"zcat $r1|") or die "Could not open $r1 $!";
-  open(R2,">",$r2) or die "Could not write to $r2: $!";
-  while(<R1>){
-    if(++$lineCounter % 4 == 2){
-      chomp;
-      tr/ATGCatgc/TACGtacg/;
-      $_=reverse($_)."\n";
-    }
-    print R2 $_;
-  }
-  close R1;
-  close R2;
-  system("gzip -vf $r2"); 
-  die "ERROR with gzip $r2" if $?;
-'
-REF=$(ls $THISDIR/$name/reference/*.fasta | head -n 1)
-nice run_snp_pipeline.sh -s $THISDIR/$name/samples -m copy -o $THISDIR/$name/snp-pipeline $REF
-
-# Infer a phylogeny following SNP-Pipeline
-cd $THISDIR/$name/snp-pipeline
-  rm -vf RAxML*.snp-pipeline # rm any previous results
-  raxmlHPC -f a -s snpma.fasta -x $RANDOM -p $RANDOM -N 100 -m GTRGAMMA -n snp-pipeline
-cd -
-NEWTREE=$THISDIR/$name/snp-pipeline/RAxML_bipartitions.snp-pipeline
-REFTREE=$THISDIR/$name/tree.dnd
-
-# Compare vs original tree
-
-# Fix any isolate that has quotes or spaces
-cat $REFTREE $NEWTREE | perl -MBio::TreeIO -lane "
-  BEGIN{
-    \$out=Bio::TreeIO->new(-format=>'newick');
-  }
-  s/ /_/g;        # spaces to underscores
-  s/'//g;         # remove single quotes
-  s/;\s*/;\n/;    # newline after any semicolon
-  \$tree=Bio::TreeIO->new(-string=>\$_, -format=>'newick')->next_tree;
-  @nodes= \$tree->get_nodes;
-  @nodes=sort {\$b->id cmp \$a->id || \$b cmp \$a} @nodes;
-  \$tree->reroot_at_midpoint(\$nodes[0],'root');
-  #\$tree->force_binary();
-  for(@nodes){
-    # Avoid no ID errors
-    \$_->id(100) if(!\$_->id);
-    # Avoid weird branch length issues
-    \$_->branch_length(1);
-  }
-  \$out->write_tree(\$tree);
-" > $THISDIR/$name/allTrees.dnd
-# Compare with RAxML
-cd $THISDIR/$name
-  rm -vf RAxML*.TEST # rm any previous results
-  raxmlHPC -m GTRCAT -z allTrees.dnd -f r -n TEST
-  cat RAxML_RF-Distances.TEST
-  # Robinson-Foulds metric is the third number in this file
-  RF=$(cut -f 3 -d ' ' RAxML_RF-Distances.TEST)
-cd -
-msg "Robinson-Foulds metric is $RF between your tree and the reference tree"
-
+exit;
+R1=$(find . -type f -name '*.fastq.gz');
+mashtree --numcpus $NUMCPUS > lambda.mashtree.dnd
