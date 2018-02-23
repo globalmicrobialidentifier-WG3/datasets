@@ -53,7 +53,31 @@ GenFSGopher.pl --outdir $THISDIR/$name --layout cfsan --numcpus $NUMCPUS $tsv
 
 msg "SNP-Pipeline"
 
-find . -type f -name '*.fastq.gz' -size 0 -exec rm -v {} \;
+# Reverse complement all read 1 into read 2,
+# a poor man's way of making PE reads because
+# the lambda set is SE only.
+find . -type f -name '*.fastq.gz' -size 0 | xargs -P 1 -n 1 perl -e '
+  my $r2 = $ARGV[0];
+  $r1 = $r2;
+  $r1 =~ s/_2.fastq.gz/_1.fastq.gz/;
+  $r1 =~ s/_R2_/_R1_/;
+  $r2 =~ s/\.gz$//;
+  my $lineCounter=0;
+  open(R1,"zcat $r1|") or die "Could not open $r1 $!";
+  open(R2,">",$r2) or die "Could not write to $r2: $!";
+  while(<R1>){
+    if(++$lineCounter % 4 == 2){
+      chomp;
+      tr/ATGCatgc/TACGtacg/;
+      $_=reverse($_)."\n";
+    }
+    print R2 $_;
+  }
+  close R1;
+  close R2;
+  system("gzip -f $r2"); 
+  die "ERROR with gzip $r2" if $?;
+'
 REF=$(ls $THISDIR/$name/reference/*.fasta | head -n 1)
 nice run_snp_pipeline.sh -s $THISDIR/$name/samples -m soft -o $THISDIR/$name/snp-pipeline $REF
 
