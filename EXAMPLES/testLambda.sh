@@ -23,24 +23,6 @@ done
 # Need perl >= 5.12.0
 msg "Testing if perl >= 5.12.0 is in PATH"
 perl -e 'use 5.12.0; print "  -OK\n"'
-msg "Checking for samtools v1 or above"
-VERSION=$(samtools --version | grep samtools | grep -P -o '\d+(.\d+)?')
-VERSION=${VERSION:0:1}
-if (( $(echo "$VERSION < 1" | bc -l) )); then
-  msg "Found version $VERSION of samtools but need >= 1"
-  exit 1
-fi
-msg "  -OK"
-
-msg "Testing for RAxML, but if it's not present, I will download and install it"
-which raxmlHPC || ( \
-  wget 'https://github.com/stamatak/standard-RAxML/archive/v8.1.16.tar.gz' -O $THISDIR/raxml_v8.1.16.tar.gz && \
-  cd $THISDIR && tar zxvf raxml_v8.1.16.tar.gz && \
-  make -j $NUMCPUS -C standard-RAxML-8.1.16 -f Makefile.gcc && \
-  cd - && \
-  rm -vf $THISDIR/raxml_v8.1.16.tar.gz
-) && \
-which raxmlHPC
 
 msg "Downloading datasets"
 
