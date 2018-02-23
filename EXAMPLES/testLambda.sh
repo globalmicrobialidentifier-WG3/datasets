@@ -16,8 +16,7 @@ function msg(){
 }
 
 msg "Looking for dependencies for both Gen-FS Gopher and for CFSAN SNP Pipeline"
-for exe in esearch fastq-dump perl make GenFSGopher.pl run_snp_pipeline.sh \
-  bowtie2 tabix bgzip bcftools; do
+for exe in esearch fastq-dump perl make GenFSGopher.pl; do
   echo "Testing PATH for $exe";
   which $exe || (echo "ERROR finding $exe;" exit 1;);
 done
