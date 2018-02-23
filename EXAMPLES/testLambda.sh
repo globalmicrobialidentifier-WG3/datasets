@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NUMCPUS=1
+NUMCPUS=12
 
 set -e
 
@@ -51,6 +51,9 @@ name=$(basename $tsv .tsv)
 msg "Downloading $name"
 GenFSGopher.pl --outdir $THISDIR/$name --layout cfsan --numcpus $NUMCPUS $tsv 
 
+# creating a tree is giving me a heada
+#exit;
+
 msg "SNP-Pipeline"
 
 # Reverse complement all read 1 into read 2,
@@ -75,11 +78,11 @@ find . -type f -name '*.fastq.gz' -size 0 | xargs -P 1 -n 1 perl -e '
   }
   close R1;
   close R2;
-  system("gzip -f $r2"); 
+  system("gzip -vf $r2"); 
   die "ERROR with gzip $r2" if $?;
 '
 REF=$(ls $THISDIR/$name/reference/*.fasta | head -n 1)
-nice run_snp_pipeline.sh -s $THISDIR/$name/samples -m soft -o $THISDIR/$name/snp-pipeline $REF
+nice run_snp_pipeline.sh -s $THISDIR/$name/samples -m copy -o $THISDIR/$name/snp-pipeline $REF
 
 # Infer a phylogeny following SNP-Pipeline
 cd $THISDIR/$name/snp-pipeline
