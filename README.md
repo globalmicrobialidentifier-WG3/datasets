@@ -98,4 +98,10 @@ To create your own dataset and to make it compatible with the existing script(s)
   9. sha256sumRead1 - A checksum for the first read from the SRR accession
   10. sha256sumRead2 - A checksum for the second read from the SRR accession
 
+## Citation
+
+If this project has helped you, please cite us with
+
+Timme, Ruth E., et al. "Benchmark datasets for phylogenomic pipeline validation, applications for foodborne pathogen surveillance." PeerJ 5 (2017): e3893.
+
 [![Build Status](https://travis-ci.org/globalmicrobialidentifier-WG3/datasets.svg?branch=master)](https://travis-ci.org/globalmicrobialidentifier-WG3/datasets)
