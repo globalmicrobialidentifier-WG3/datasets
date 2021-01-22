@@ -13,7 +13,7 @@ use File::Basename qw/fileparse dirname basename/;
 use File::Temp qw/tempdir tempfile/;
 use File::Spec;
 
-my $VERSION=0.4;
+my $VERSION=0.5;
 
 my $scriptInvocation="$0 ".join(" ",@ARGV);
 my $scriptsDir=dirname(File::Spec->rel2abs($0));
@@ -105,6 +105,14 @@ sub tsvToMakeHash{
   $$make{".DEFAULT"}{".DELETE_ON_ERROR"}=[];
   $$make{".DEFAULT"}{".SUFFIXES"}=[];
 
+  # We will append SRA Run IDs to the zeroth element
+  # for this command like so:
+  #   $$make{"prefetch.done"}{CMD}[0] .= " $SRA_Run_ID";
+  $$make{"prefetch.done"}{CMD} = [
+    "prefetch",
+    "touch $make_target",
+  ];
+
   my $fileToName={};            # mapping filename to base name
   my $have_reached_biosample=0; # marked true when it starts reading entries
   my @header=();                # defined when we get to the biosample_acc header row
@@ -172,10 +180,13 @@ sub tsvToMakeHash{
             "mv $dumpdir/$F{srarun_acc}_1.fastq.gz '$make_target'",
           ],
           DEP=>[
-            $dumpdir
+            $dumpdir,
+            "prefetch.done",
           ],
         };
         push(@{ $$make{"all"}{DEP} }, $filename1, $filename2);
+
+        $$make{"prefetch.done"}{CMD}[0] .= " $F{srarun_acc}";
 
         if($$settings{shuffled}){
           my $filename3="$dumpdir/$F{strain}.shuffled.fastq.gz";
@@ -281,7 +292,69 @@ sub tsvToMakeHash{
         }
       }
 
-    } elsif(/^biosample_acc/){
+      # Sometimes there might only be a nucleotide accession
+      # and not an assembly accession. This is under the 
+      # nucleotide header.
+      if($F{nucleotide} && $F{nucleotide} !~ /\-|NA/i){
+        # Any error checking before we start with this entry.
+        $F{strain} || die "ERROR: $F{nucleotide} does not have a strain name!";
+
+        my $filename="$F{strain}.fna";
+        my $dumpdir  ='.';
+
+        if($$settings{layout} eq 'onedir'){
+          # The defaults are set up for onedir, so change nothing if the layout is onedir
+        } elsif($$settings{layout} eq 'byrun'){
+          $dumpdir=$F{strain};
+        } elsif($$settings{layout} eq 'byformat'){
+          $dumpdir="nucleotide";
+        } elsif($$settings{layout} eq 'cfsan'){
+          # Only the reference genome belongs in this folder
+          if($F{suggestedreference} =~ /^(true|1)$/i){
+            $dumpdir="reference";
+          } else {
+            $dumpdir="samples/$F{strain}";
+          }
+        } else{
+          die "ERROR: I do not understand layout $$settings{layout}";
+        }
+
+        # Change the directory for these filenames if they aren't being
+        # dumped into the working directory.
+        if($$settings{layout} ne 'onedir'){
+          $filename="$dumpdir/$filename";
+          $$make{$dumpdir}{CMD}=["mkdir -p $dumpdir"];
+        }
+
+        # The make command
+        $$make{$filename}={
+          CMD=>[
+            "esearch -db nucleotide -query '$F{nucleotide}' | efetch -format fasta > $make_target", 
+          ],
+          DEP=>[
+            $dumpdir
+          ],
+        };
+        
+        # Calculate hashsums if they exist and if we are not recalculating them
+        if($F{sha256sumnucleotide} && $F{sha256sumnucleotide} !~ /\-|NA/ && !$$settings{'calculate-hashsums'}){
+          push(@{ $$make{"sha256sum.txt"}{CMD} }, "echo \"$F{sha256sumnucleotide}  $filename\" >> $make_target");
+          push(@{ $$make{"sha256sum.txt"}{DEP} }, $filename);
+        }
+
+        if ($$settings{'calculate-hashsums'}) {
+          push(@{ $$make{"sha256sum.txt"}{CMD} }, 
+            "sha256sum $filename >> $make_target",
+          );
+          push(@{ $$make{"sha256sum.txt"}{DEP} }, $filename);
+        }
+      }
+
+    } 
+    # If we got up to this line, it clues us in that we
+    # have reached the meat of the spreadsheet.
+    # Get the header.
+    elsif(/^biosample_acc/){
       $have_reached_biosample=1;
       @header=split(/\t/,lc($_));
       next;
