@@ -97,6 +97,8 @@ To create your own dataset and to make it compatible with the existing script(s)
   8. sha256sumAssembly - A checksum for the GenBank file 
   9. sha256sumRead1 - A checksum for the first read from the SRR accession
   10. sha256sumRead2 - A checksum for the second read from the SRR accession
+  11. nucleotide - A single nucleotide accession. This is sometimes an alternative to an assembly especially for one-contig genomes.
+  12. sha256sumnucleotide - a checksum for the single nucleotide accession.
 
 ## Citation
 
