@@ -18,7 +18,8 @@ function msg(){
 msg "Looking for dependencies for both Gen-FS Gopher and for CFSAN SNP Pipeline"
 for exe in esearch fastq-dump perl make GenFSGopher.pl run_snp_pipeline.sh \
   bowtie2 tabix bgzip bcftools; do
-  which $exe
+  echo "Testing PATH for $exe";
+  which $exe || (echo "ERROR finding $exe;" exit 1;);
 done
 # Need perl >= 5.12.0
 msg "Testing if perl >= 5.12.0 is in PATH"
@@ -65,7 +66,26 @@ for tsv in $THISDIR/../datasets/*.tsv; do
   # Compare vs original tree
 
   # Fix any isolate that has quotes or spaces
-  cat $REFTREE $NEWTREE | perl -lane "s/ /_/g; s/'//g; print;" > $THISDIR/$name/allTrees.dnd
+  cat $REFTREE $NEWTREE | perl -MBio::TreeIO -lane "
+    BEGIN{
+      \$out=Bio::TreeIO->new(-format=>'newick');
+    }
+    s/ /_/g;        # spaces to underscores
+    s/'//g;         # remove single quotes
+    s/;\s*/;\n/;    # newline after any semicolon
+    \$tree=Bio::TreeIO->new(-string=>\$_, -format=>'newick')->next_tree;
+    @nodes= \$tree->get_nodes;
+    @nodes=sort {\$b->id cmp \$a->id || \$b cmp \$a} @nodes;
+    \$tree->reroot_at_midpoint(\$nodes[0],'root');
+    #\$tree->force_binary();
+    for(@nodes){
+      # Avoid no ID errors
+      \$_->id(100) if(!\$_->id);
+      # Avoid weird branch length issues
+      \$_->branch_length(1);
+    }
+    \$out->write_tree(\$tree);
+  " > $THISDIR/$name/allTrees.dnd
   # Compare with RAxML
   cd $THISDIR/$name
     rm -vf RAxML*.TEST # rm any previous results
