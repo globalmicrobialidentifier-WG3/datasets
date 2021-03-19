@@ -1,7 +1,7 @@
 Organism	SARS-CoV-2											
 Outbreak	SNF A											
 pmid	33303686											
-tree	https://itol.embl.de/download.cgi?f=xgkDfgJpj0-D75secf5tHA_newick.txt											
+tree	https://raw.githubusercontent.com/globalmicrobialidentifier-WG3/datasets/master/datasets/trees/sarscov2-SNF-A.dnd
 source	Danny Park											
 dataType	Outbreak											
 												
